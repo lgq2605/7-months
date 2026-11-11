@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#14122b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+<title>Seven months</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#14122b; --deep:#1d1a3e; --gold:#f2c46d; --rose:#e8a5b5; --mist:#cfc9e8; --paper:#fff6ea;
+  --serif:"Young Serif",Georgia,"Times New Roman",serif;
+  --sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;color:var(--paper);font-family:var(--sans);line-height:1.6;
+  background:radial-gradient(ellipse at 50% 0%,var(--deep),var(--night) 70%) var(--night)}
+#nebula{position:fixed;inset:-20%;z-index:-3;pointer-events:none;
+  background:
+    radial-gradient(40% 35% at 20% 25%,#e8a5b533,transparent 70%),
+    radial-gradient(45% 40% at 80% 35%,#7a6bd633,transparent 70%),
+    radial-gradient(50% 40% at 55% 85%,#f2c46d1f,transparent 70%),
+    radial-gradient(35% 30% at 10% 80%,#4fb6c71a,transparent 70%);
+  animation:drift 50s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(-2%,-1%,0) scale(1)}to{transform:translate3d(3%,2%,0) scale(1.12)}}
+.moon{--m:clamp(44px,8vw,76px);position:fixed;top:6vh;right:7vw;width:var(--m);height:var(--m);border-radius:50%;z-index:-2;pointer-events:none;opacity:.9;
+  box-shadow:inset calc(var(--m) * -.24) calc(var(--m) * .05) 0 0 var(--paper),0 0 46px 4px #fff6ea2e}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+main{max-width:720px;margin:0 auto;padding:12vh 24px 10vh;overflow-x:clip}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.8rem,11vw,5rem);line-height:1.02;margin:0 0 .4em;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-weight:400;font-size:1.6rem;margin:0 0 .3em}
+.lead{color:var(--mist);max-width:34em;margin:0 0 2.2rem}
+.clock{display:flex;flex-wrap:wrap;gap:12px clamp(10px,3.5vw,26px);margin:0 0 5.5rem;padding:0;list-style:none;opacity:0;transition:opacity 1s ease}
+.clock.on{opacity:1}
+.clock b{display:flex;font-family:var(--serif);font-weight:400;font-size:2.1rem;color:var(--gold);line-height:1.15}
+.dg{display:block;width:.64em;height:1.15em;overflow:hidden;text-align:center}
+.dg i{display:block;font-style:normal;will-change:transform}
+.dg i div{height:1.15em}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#balloons{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:5}
+.bl{position:absolute;bottom:0;left:0;will-change:transform;pointer-events:auto;cursor:pointer}
+.sw{transform-origin:50% 20%;will-change:transform}
+.bl svg{display:block;width:100%;height:auto;overflow:visible}
+.bp{position:fixed;left:0;top:0;pointer-events:none;z-index:6;line-height:1}
+.clock span{font-size:.9rem;color:var(--mist)}
+.progress{color:var(--mist);margin:0 0 .5rem;font-size:.95rem}
+.sky{width:100%;height:auto;display:block;margin:0 0 1.5rem;overflow:visible;touch-action:manipulation}
+.sky line{stroke:var(--mist);stroke-opacity:.2;stroke-width:.3;stroke-dasharray:1 1;transition:stroke .6s,stroke-opacity .6s}
+.sky line.lit{stroke:var(--gold);stroke-opacity:.8}
+.star{cursor:pointer;outline:none}
+.star .hit{fill:transparent}
+.star .halo{fill:url(#glow);opacity:0;transition:opacity .4s}
+.star .core{fill:var(--mist);fill-opacity:.6;stroke:var(--mist);stroke-opacity:.6;stroke-width:.35;stroke-linejoin:round;transform-box:fill-box;transform-origin:center;transition:fill .4s,fill-opacity .4s,stroke .4s}
+.star .rays{fill:var(--gold);opacity:0;transform-box:fill-box;transform-origin:center;transition:opacity .5s}
+.star.lit .rays{opacity:.85;animation:tw 3.2s ease-in-out infinite}
+.star:nth-child(odd) .rays{animation-delay:-1.6s}
+@keyframes tw{50%{opacity:.35;transform:scale(.8) rotate(12deg)}}
+.star.lit .core{fill:var(--gold);fill-opacity:1;stroke:var(--gold);stroke-opacity:1}
+.star.lit .halo{opacity:.55}
+.star:hover .halo{opacity:.8}
+.star.on .halo,.star:focus-visible .halo{opacity:1}
+.star.on text,.star:focus-visible text{fill:var(--gold)}
+.star text{fill:var(--mist);font:3.2px var(--sans);text-anchor:middle}
+.star.hint .core{animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{fill-opacity:1;transform:scale(1.45)}}
+.sky line.last{opacity:0}
+.sky line.last.lit{opacity:1}
+.final{opacity:0;pointer-events:none}
+.final.ready{opacity:1;pointer-events:auto}
+.final.pop{animation:popin 1s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes popin{0%{transform:scale(0);opacity:0}55%{transform:scale(2);opacity:1}100%{transform:scale(1);opacity:1}}
+.final.ready .core{animation:pulse 1.8s ease-in-out infinite}
+.final.ready .core{fill:var(--rose);fill-opacity:1;stroke:var(--rose);stroke-opacity:1}
+.final.ready .rays{fill:var(--rose);opacity:.9}
+.final.ready .halo{fill:url(#glowr);opacity:.9}
+.card{display:grid;gap:.6rem;border-left:3px solid var(--rose);padding:.2rem 0 .2rem 1.2rem;margin:0 0 1rem;min-height:11rem}
+.card .num{font-family:var(--serif);font-size:3.4rem;line-height:1;color:var(--rose)}
+.card .mo{color:var(--mist);font-size:.95rem;margin-top:-.4rem}
+.card p{margin:0;max-width:34em}
+.card img{max-width:100%;max-height:300px;border-radius:10px;display:block}
+.card>*{animation:fadein .5s ease both}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}}
+.letter.skip .w{animation:none;opacity:1}
+.again{font:inherit;font-size:.9rem;color:var(--mist);background:none;border:0;border-bottom:1px dotted #cfc9e888;padding:0;margin-top:.4rem;cursor:pointer}
+.again:hover{color:var(--gold)}
+.nav{display:flex;gap:10px;margin:0 0 5rem}
+.nav button,dialog button{font:inherit;color:var(--paper);background:transparent;border:1px solid #cfc9e855;border-radius:999px;padding:.45rem 1.1rem;cursor:pointer}
+.nav button:hover,dialog button:hover{border-color:var(--gold);color:var(--gold)}
+button:focus-visible{outline:2px solid var(--rose);outline-offset:3px}
+.nav button[disabled]{opacity:.35;cursor:default}
+footer{border-top:1px solid #cfc9e833;padding-top:2.5rem}
+footer p{max-width:32em;color:var(--mist);margin:0 0 1rem}
+.sig{font-family:var(--serif);color:var(--paper)!important}
+dialog{background:var(--deep);color:var(--paper);border:1px solid #e8a5b566;border-radius:16px;width:min(540px,calc(100vw - 32px));padding:2rem 2rem 1.6rem}
+dialog::backdrop{background:#0a0919cc}
+dialog h2{color:var(--rose)}
+.letter{margin:0 0 1.5rem}
+.letter p{margin:0 0 1rem;line-height:1.75}
+.w{opacity:0;display:inline-block;animation:wd .7s ease forwards}
+.lsig{display:block;font-family:var(--serif);color:var(--rose);margin-top:1.4rem!important}
+@keyframes wd{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+dialog[open]{animation:dlg .5s ease}
+@keyframes dlg{from{opacity:0;transform:scale(.94) translateY(10px)}}
+.hero-in{opacity:0;transform:translateY(14px);animation:rise 1.1s .15s ease forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.card>*{animation:none}.hero-in{animation:none;opacity:1;transform:none}.star .core,.star .halo,.sky line{transition:none}.star.hint .core,.final.ready .core,.final.pop{animation:none}.w{animation:none;opacity:1}dialog[open]{animation:none}.star.lit .rays,#nebula{animation:none}.clock{transition:none}}
+</style>
+</head>
+<body>
+<div id="nebula" aria-hidden="true"></div>
+<div class="moon" aria-hidden="true"></div>
+<canvas id="bg" aria-hidden="true"></canvas>
+<main>
+  <header class="hero-in">
+    <h1>Seven months with you</h1>
+    <p class="lead">Every month so far has been one small light. Light them all and see what appears.</p>
+    <ul class="clock" aria-label="Time together">
+      <li><b id="mo" aria-hidden="true"></b><span>months</span></li>
+      <li><b id="d" aria-hidden="true"></b><span>days</span></li>
+      <li><b id="h" aria-hidden="true"></b><span>hours</span></li>
+      <li><b id="m" aria-hidden="true"></b><span>minutes</span></li>
+      <li><b id="s" aria-hidden="true"></b><span>seconds</span></li>
+      <li class="vh" id="vh"></li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="sky-h">
+    <h2 id="sky-h">Our seven stars</h2>
+    <p class="progress" id="progress"></p>
+    <svg class="sky" id="sky" viewBox="0 0 100 56" role="group" aria-label="Seven stars, one for each month"></svg>
+    <div class="card" id="card" aria-live="polite"><p>Tap the glowing star to begin.</p></div>
+    <div class="nav">
+      <button type="button" id="prev">Previous month</button>
+      <button type="button" id="next">Next month</button>
+    </div>
+  </section>
+
+  <footer>
+    <h2>Happy 7 months</h2>
+    <p>Thank you for every ordinary day that felt special. I am looking forward to the stars we have not found yet.</p>
+    <p class="sig" id="sig"></p>
+    <button type="button" class="again" id="again">Light the stars again</button>
+  </footer>
+</main>
+
+<dialog id="letter" aria-labelledby="lt">
+  <h2 id="lt">A last star</h2>
+  <div class="letter" id="ltxt"></div>
+  <button type="button" id="close">Close</button>
+</dialog>
+
+<script>
+/* ===== EDIT THIS PART ===== */
+const START = new Date("2026-04-11T22:00:00+07:00");   // 10 PM, 11 April 2026, Vietnam time
+const SIGNATURE = "From Gqn, with love.";
+const LETTER = "Cảm ơn em đã ở bên anh suốt 7 tháng vừa qua. Dù cho thời gian qua có những lúc buồn vui cùng nhau nhưng mọi kỷ niệm đó sẽ luôn là một ký ức hạnh phúc ở cái tuổi mới lớn này. Tương lai vẫn còn nhiều thử thách phía trước, nhưng anh tin rằng với tình yêu mà chúng ta dành cho nhau thì chúng ta sẽ vượt qua tất cả. Anh yêu em nhiều hơn những gì từ ngữ nào có thể diễn tả. Hãy cùng nhau viết tiếp câu chuyện của chúng ta, từng ngày, từng tháng, hay thậm chí từng năm. \n\nTừ những giây phút đầu tiên, em đã là một phần không thể thiếu trong cuộc sống của anh.\n\nAnh yêu em, mãi mãi.";
+const MONTHS = [   // photo is optional: a file next to this page ("photos/1.jpg") or a data: URI
+  { label: "May",       text: "First time together - 16/05/2026", photo: "image/1.jpg" },
+  { label: "June",      text: "The promise of the thing you want - 22/06/2026", photo: "image/2.jpg" },
+  { label: "July",      text: "Summer together", photo: "" },
+  { label: "August",    text: "Prepare for school", photo: "" },
+  { label: "September", text: "First day at high school but two different schools:<", photo: "" },
+  { label: "October",   text: "First gathering in the new uniform - 10/10/2026\n\nStudy date #2! - 20/10/2026", photo: ["image/3.jpg", "image/4.jpg"] },
+  { label: "November",  text: "Study date #3! - 3/11/2026", photo: "image/5.jpg" }
+];
+const FIRST = 1;   // number of the first month listed above (May = month 1)
+/* ========================== */
+
+const N = MONTHS.length;   // month stars; the last star (November) comes after them
+
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+document.getElementById("sig").textContent = SIGNATURE;
+
+/* Live counter: whole months, then the rest */
+const $ = id => document.getElementById(id);
+function readClock(){
+  const now = new Date();
+  let months = (now.getFullYear() - START.getFullYear()) * 12 + now.getMonth() - START.getMonth();
+  let anchor = new Date(START); anchor.setMonth(START.getMonth() + months);
+  if (anchor > now) { months--; anchor = new Date(START); anchor.setMonth(START.getMonth() + months); }
+  months = Math.max(0, months);
+  const s = Math.max(0, Math.floor((now - anchor) / 1000));
+  return [months, Math.floor(s / 86400), Math.floor(s % 86400 / 3600), Math.floor(s % 3600 / 60), s % 60];
+}
+
+/* Clock reels: each digit is a strip of numbers that rolls like an odometer */
+const reels = [];
+["mo", "d", "h", "m", "s"].forEach(u => {
+  for (let k = 0; k < 2; k++) {
+    const dg = document.createElement("div"); dg.className = "dg";
+    const strip = document.createElement("i");
+    for (let n = 0; n <= 30; n++) { const c = document.createElement("div"); c.textContent = n % 10; strip.append(c); }
+    dg.append(strip); $(u).append(dg);
+    reels.push({ strip, d: 0, t: 0 });
+  }
+});
+function roll(r, d, ms, spin){
+  clearTimeout(r.t);
+  const go = (to, t) => {
+    r.strip.style.transition = t ? "transform " + t + "ms cubic-bezier(.16,.8,.2,1)" : "none";
+    r.strip.style.transform = "translateY(" + (-to * 1.15) + "em)";
+    void r.strip.offsetWidth;
+  };
+  if (spin && ms) { go(20 + d, ms); r.t = setTimeout(() => go(d, 0), ms + 20); }   // two full turns, then land
+  else if (d >= r.d) go(d, ms);
+  else { go(10, ms); r.t = setTimeout(() => { go(0, 0); if (d) go(d, ms); }, ms + 20); }
+  r.d = d;
+}
+function show(v, ms, stagger, spin){
+  v.forEach((x, i) => {
+    const t = String(Math.min(99, x)).padStart(2, "0");
+    [0, 1].forEach(k => setTimeout(() => roll(reels[i * 2 + k], +t[k], ms, spin), i * stagger + k * 90));
+  });
+  $("vh").textContent = v[0] + " months, " + v[1] + " days, " + v[2] + " hours, " + v[3] + " minutes, " + v[4] + " seconds";
+}
+const TM = reduce ? 0 : 450;
+function startLive(){ show(readClock(), TM, 0); setInterval(() => show(readClock(), TM, 0), 1000); }
+
+/* Opening: hearts fly up, then the clock spins from all zeros to now */
+function launchBalloons(onDone){
+  const box = document.createElement("div"); box.id = "balloons";
+  box.innerHTML = '<svg width="0" height="0" style="position:absolute"><defs>' +
+    '<radialGradient id="shine" cx=".32" cy=".28" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="shade" cx=".72" cy=".8" r=".7"><stop offset=".4" stop-color="#5a0f33" stop-opacity="0"/><stop offset="1" stop-color="#5a0f33" stop-opacity=".4"/></radialGradient></defs></svg>';
+  document.body.append(box);
+  const H = innerHeight, W = innerWidth, left = { n: 0 };
+  const cols = ["#e8a5b5", "#f27a93", "#f2c46d", "#ff9eb5", "#d95f86", "#ffd0dc"];
+  const HEART = "M16 29C16 29 2 19 2 9.5 2 4.5 6 1.5 10 1.5 13 1.5 15 3.2 16 5 17 3.2 19 1.5 22 1.5 26 1.5 30 4.5 30 9.5 30 19 16 29 16 29Z";
+
+  // Tap a balloon: it pops into little hearts
+  const burst = (x, y, c, big) => {
+    for (let k = 0; k < (big ? 28 : 12); k++) {
+      const p = document.createElement("div"); p.className = "bp"; p.textContent = "\u2665";
+      p.style.cssText = "left:" + x + "px;top:" + y + "px;color:" + c + ";font-size:" + (10 + Math.random() * (big ? 20 : 10)) + "px";
+      document.body.append(p);
+      const a = Math.random() * 6.283, d = (big ? 90 : 50) + Math.random() * (big ? 130 : 70), dx = Math.cos(a) * d, dy = Math.sin(a) * d - 20;
+      p.animate([
+        { transform: "translate(0,0) scale(.5)", opacity: 1 },
+        { transform: "translate(" + dx + "px," + dy + "px) scale(1) rotate(" + (Math.random() * 60 - 30) + "deg)", opacity: 1, offset: .55 },
+        { transform: "translate(" + dx * 1.1 + "px," + (dy + 70) + "px) scale(.4)", opacity: 0 }
+      ], { duration: 900 + Math.random() * 600, easing: "ease-out" }).onfinish = () => p.remove();
+    }
+  };
+
+  const make = (w, c, delay, dur, alpha, label) => {
+    const h = w * 70 / 32;
+    const b = document.createElement("div"); b.className = "bl";
+    b.style.cssText = "width:" + w + "px;left:" + (label ? (W - w) / 2 : Math.random() * (W - w)) + "px;opacity:" + alpha;
+    const sw = document.createElement("div"); sw.className = "sw";
+    sw.innerHTML = '<svg viewBox="0 0 32 70"><path d="' + HEART + '" fill="' + c + '"/><path d="' + HEART + '" fill="url(#shade)"/><path d="' + HEART + '" fill="url(#shine)"/>' +
+      '<path d="M16 29l-2.2 3h4.4z" fill="' + c + '"/><path d="M16 32c-3 6 3 10 0 17s3 12 0 20" stroke="#fff6ea" stroke-opacity=".55" stroke-width=".7" fill="none"/>' +
+      (label ? '<text x="16" y="18" text-anchor="middle" font-family="Young Serif,Georgia,serif" font-size="13" fill="#14122b">' + label + '</text>' : "") + '</svg>';
+    b.append(sw); box.append(b); left.n++;
+    // gentle sway and swing, looping
+    const amp = 8 + Math.random() * 22, sd = 2200 + Math.random() * 1800;
+    sw.animate([{ transform: "translateX(" + -amp + "px) rotate(-6deg)" }, { transform: "translateX(" + amp + "px) rotate(6deg)" }],
+      { duration: sd, direction: "alternate", iterations: Infinity, easing: "ease-in-out", delay: -Math.random() * sd });
+    // rise from below the screen; fill "both" keeps it hidden while it waits
+    let gone = false;
+    const end = () => { if (gone) return; gone = true; b.remove(); if (!--left.n) { box.remove(); if (onDone) onDone(); } };
+    b.animate([{ transform: "translateY(" + (h + 20) + "px)" }, { transform: "translateY(" + (-(H + 40)) + "px)" }],
+      { duration: dur, delay, easing: "cubic-bezier(.3,.05,.6,1)", fill: "both" }).onfinish = end;
+    b.addEventListener("pointerdown", () => { if (gone) return; const r = b.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.width / 2, c, !!label); end(); });
+  };
+
+  for (let i = 0; i < 9; i++)  make(26 + Math.random() * 16, cols[i % 6], Math.random() * 2200, 7500 + Math.random() * 2500, .5);        // far
+  for (let i = 0; i < 10; i++) make(48 + Math.random() * 24, cols[(i + 2) % 6], Math.random() * 1800, 5200 + Math.random() * 1800, .9);  // middle
+  for (let i = 0; i < 5; i++)  make(84 + Math.random() * 30, cols[(i + 4) % 6], 300 + Math.random() * 1500, 4000 + Math.random() * 1200, 1); // near
+  make(Math.min(150, W * .42), "#f2c46d", 2300, 7600, 1, "7");                                                                        // big "7"
+}
+const clockEl = document.querySelector(".clock");
+let revealed = false;
+function reveal(){
+  if (revealed) return; revealed = true;
+  clockEl.classList.add("on");
+  setTimeout(() => show(readClock(), 2600, 160, true), 500);                 // spin from 00 to now
+  setTimeout(startLive, 500 + 2600 + 4 * 160 + 300);                         // then keep counting
+}
+if (reduce) { clockEl.classList.add("on"); revealed = true; show(readClock(), 0, 0); startLive(); }
+else { launchBalloons(reveal); setTimeout(reveal, 16000); }                  // 16 s is only a safety net
+
+/* Constellation */
+const NS = "http://www.w3.org/2000/svg";
+const sky = $("sky"), card = $("card");
+const pts = [[8,38],[20,20],[34,32],[47,14],[60,28],[72,44],[83,22],[94,7]];
+const el = (n, a, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); (p || sky).appendChild(e); return e; };
+
+const lit = new Set();
+
+const defs = el("defs", {});   // soft glows: bright in the middle, fading to nothing
+[["glow", "#f2c46d"], ["glowr", "#e8a5b5"]].forEach(([id, c]) => {
+  const rg = el("radialGradient", { id }, defs);
+  [[0, .9], [.4, .3], [1, 0]].forEach(([o, a]) => el("stop", { offset: o, "stop-color": c, "stop-opacity": a }, rg));
+});
+const lines = pts.slice(0, -1).map((p, i) => el("line", { x1: p[0], y1: p[1], x2: pts[i+1][0], y2: pts[i+1][1] }));
+let current = -1, booted = false;
+lines[N-1].classList.add("last");
+
+// Real five-point stars, plus a four-ray sparkle that shows when a star is lit
+const starPath = (x, y, R, r) => {
+  let d = "";
+  for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, q = k % 2 ? r : R; d += (k ? "L" : "M") + (x + Math.cos(a) * q).toFixed(2) + " " + (y + Math.sin(a) * q).toFixed(2); }
+  return d + "Z";
+};
+const sparkle = (x, y, L) => { const w = L * .09; return "M" + x + " " + (y - L) + "L" + (x + w) + " " + (y - w) + "L" + (x + L) + " " + y + "L" + (x + w) + " " + (y + w) + "L" + x + " " + (y + L) + "L" + (x - w) + " " + (y + w) + "L" + (x - L) + " " + y + "L" + (x - w) + " " + (y - w) + "Z"; };
+
+const stars = pts.map((p, i) => {
+  const last = i === N;
+  const g = el("g", { class: "star" + (last ? " final" : ""), tabindex: 0, role: "button",
+    "aria-label": last ? "A last star" : "Month " + (i+FIRST) + ", " + MONTHS[i].label });
+  el("circle", { class: "hit", cx: p[0], cy: p[1], r: 7 }, g);
+  el("circle", { class: "halo", cx: p[0], cy: p[1], r: 7 }, g);
+  el("path", { class: "rays", d: sparkle(p[0], p[1], 6) }, g);
+  el("path", { class: "core", d: starPath(p[0], p[1], 3, 1.3) }, g);
+  const t = el("text", { x: p[0], y: p[1] + 10 }, g);
+  t.textContent = last ? "" : MONTHS[i].label;
+  if (last) g.style.transformOrigin = p[0] + "px " + p[1] + "px";
+  const act = () => last ? openLetter() : open(i);
+  g.addEventListener("click", act);
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } });
+  return g;
+});
+
+/* The eighth star pops in with a shockwave and sparks */
+function popFinal(){
+  const x = pts[N][0], y = pts[N][1], g = stars[N], o = x + "px " + y + "px";
+  g.classList.remove("pop"); void g.getBoundingClientRect(); g.classList.add("pop");
+  const ring = el("circle", { cx: x, cy: y, r: 2.5, fill: "none", stroke: "#e8a5b5", "stroke-width": .5, "pointer-events": "none" });
+  ring.style.transformOrigin = o;
+  ring.animate([{ transform: "scale(.4)", opacity: 1 }, { transform: "scale(7)", opacity: 0 }], { duration: 1100, easing: "ease-out" }).onfinish = () => ring.remove();
+  for (let k = 0; k < 14; k++) {
+    const a = k / 14 * 6.283 + Math.random() * .4, d = 7 + Math.random() * 9;
+    const sp = el("circle", { cx: x, cy: y, r: .5 + Math.random() * .6, fill: k % 2 ? "#f2c46d" : "#e8a5b5", "pointer-events": "none" });
+    sp.animate([{ transform: "translate(0px,0px)", opacity: 1 }, { transform: "translate(" + Math.cos(a) * d + "px," + Math.sin(a) * d + "px)", opacity: 0 }],
+      { duration: 900 + Math.random() * 500, easing: "cubic-bezier(.1,.7,.3,1)" }).onfinish = () => sp.remove();
+  }
+}
+
+/* The letter: words fade in one by one, then the signature */
+function openLetter(){
+  const box = $("ltxt"); box.textContent = ""; let i = 0;
+  box.classList.remove("skip"); box.onclick = () => box.classList.add("skip");   // tap the letter to show it all at once
+  const step = Math.min(90, 12000 / Math.max(1, LETTER.split(/\s+/).length));    // long letters speed up to finish in about 12 s
+  LETTER.split(/\n\s*\n/).forEach(par => {
+    const p = document.createElement("p"), words = par.trim().split(/\s+/);
+    words.forEach((w, k) => {
+      const sp = document.createElement("span"); sp.className = "w"; sp.textContent = w;
+      sp.style.animationDelay = (reduce ? 0 : 500 + i++ * step) + "ms";
+      p.append(sp); if (k < words.length - 1) p.append(" ");
+    });
+    box.append(p);
+  });
+  const sg = document.createElement("p"); sg.className = "w lsig"; sg.textContent = SIGNATURE;
+  sg.style.animationDelay = (reduce ? 0 : 900 + i * step) + "ms";
+  box.append(sg);
+  $("letter").showModal();
+}
+
+function refresh(){
+  stars.forEach((g, i) => { if (i < N) g.classList.toggle("lit", lit.has(i)); g.classList.toggle("on", i === current); });
+  lines.forEach((l, i) => l.classList.toggle("lit", i < N - 1 && lit.has(i) && lit.has(i + 1)));
+  const all = lit.size >= N;
+  const wasAll = stars[N].classList.contains("ready");
+  stars[N].classList.toggle("ready", all);
+  if (all && !wasAll && booted && !reduce) popFinal();
+  lines[N-1].classList.toggle("lit", all);
+  $("progress").textContent = all ? "All seven are lit. Something new just appeared in the sky." : lit.size + " of " + N + " stars lit";
+  const first = [...Array(N).keys()].find(i => !lit.has(i));
+  stars.forEach((g, i) => g.classList.toggle("hint", i === first && current === -1));
+  $("prev").disabled = current <= 0;
+  $("next").disabled = current === -1 || current >= N - 1;
+}
+
+function open(i){
+  current = i; lit.add(i);
+  const m = MONTHS[i];
+  card.textContent = "";
+  const n = document.createElement("div"); n.className = "num"; n.textContent = i + FIRST;
+  const mo = document.createElement("div"); mo.className = "mo"; mo.textContent = "Month " + (i + FIRST) + ", " + m.label;
+    card.append(n, mo);
+  const parts = m.text.split(/\n\s*\n/), pics = [].concat(m.photo || []);   // text 1 goes above photo 1, text 2 above photo 2
+  for (let k = 0; k < Math.max(parts.length, pics.length); k++) {
+    if (parts[k]) { const p = document.createElement("p"); p.textContent = parts[k]; card.append(p); }
+    if (pics[k]) { const im = document.createElement("img"); im.src = pics[k]; im.alt = "A memory from " + m.label; im.onerror = () => im.remove(); card.append(im); }
+  }
+  refresh();
+  card.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
+}
+const INTRO = card.innerHTML;
+$("again").addEventListener("click", () => {
+  lit.clear(); current = -1; card.innerHTML = INTRO; refresh();
+  sky.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+});
+$("close").addEventListener("click", () => $("letter").close());
+$("letter").addEventListener("click", e => {   // a click on the backdrop closes the letter
+  const r = e.currentTarget.getBoundingClientRect();
+  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) e.currentTarget.close();
+});
+$("prev").addEventListener("click", () => current > 0 && open(current - 1));
+$("next").addEventListener("click", () => current >= 0 && current < N - 1 && open(current + 1));
+refresh(); booted = true;
+
+/* Background: nebula glow (CSS) + layered parallax stars, a milky-way band, drifting sparks, shooting stars */
+const cv = $("bg"), cx = cv.getContext("2d");
+let W, H, layers = [], dust = [], shots = [], lastT = 0;
+const TINTS = ["#fff6ea", "#fff6ea", "#fff6ea", "#cfd8ff", "#ffd9a8", "#ffc6d6"];
+const rnd = (a, b) => a + Math.random() * (b - a);
+function size(){
+  const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const A = W * H;
+  const make = (n, r0, r1, band) => Array.from({ length: Math.round(n) }, () => {
+    let x = Math.random() * W, y = Math.random() * H;
+    if (band && Math.random() < .6) {            // pull many far stars into a diagonal milky-way band
+      const t = Math.random(), gs = Math.random() + Math.random() + Math.random() - 1.5;
+      x = t * W; y = H * (.9 - .7 * t) + gs * H * .08;
+    }
+    const rr = rnd(r0, r1);
+    return { x, y, r: rr, p: rnd(0, 6.28), s: rnd(.0004, .0016), c: TINTS[Math.floor(Math.random() * TINTS.length)], glint: r1 > 1.5 && Math.random() < .35 };
+  });
+  layers = [
+    { k: .35, a: .7, s: make(A / 5500, .3, .8, true) },   // far: tiny, slow parallax
+    { k: .7,  a: .9, s: make(A / 15000, .6, 1.3) },
+    { k: 1,   a: 1,  s: make(A / 42000, 1, 2.0) }          // near: bigger, some with glints
+  ];
+  dust = Array.from({ length: Math.round(Math.min(40, A / 20000)) }, () => ({ x: rnd(0, W), y: rnd(0, H), r: rnd(1, 2.4), v: rnd(.008, .022), p: rnd(0, 6.28), c: Math.random() < .5 ? "#e8a5b5" : "#f2c46d" }));
+}
+function draw(t){
+  const dt = Math.min(50, t - lastT); lastT = t;
+  cx.clearRect(0, 0, W, H);
+  const sy = scrollY * .15;
+  for (const L of layers) for (const s of L.s) {
+    const y = ((s.y - sy * L.k) % H + H) % H;                    // stars drift with scroll at different speeds
+    const a = (reduce ? .75 : .2 + .65 * (.5 + .5 * Math.sin(t * s.s + s.p))) * L.a;
+    cx.globalAlpha = a; cx.fillStyle = s.c; cx.beginPath(); cx.arc(s.x, y, s.r, 0, 6.283); cx.fill();
+    if (s.glint) {
+      const q = s.r * 4.5; cx.strokeStyle = s.c; cx.lineWidth = .6; cx.globalAlpha = a * .6;
+      cx.beginPath(); cx.moveTo(s.x - q, y); cx.lineTo(s.x + q, y); cx.moveTo(s.x, y - q); cx.lineTo(s.x, y + q); cx.stroke();
+    }
+  }
+  for (const d of dust) {                                          // slow warm sparks floating up
+    if (!reduce) { d.y -= d.v * dt; if (d.y < -12) { d.y = H + 12; d.x = rnd(0, W); } }
+    const x = d.x + Math.sin(t * .0006 + d.p) * 14;
+    cx.fillStyle = d.c; cx.globalAlpha = .1; cx.beginPath(); cx.arc(x, d.y, d.r * 4, 0, 6.283); cx.fill();
+    cx.globalAlpha = .7; cx.beginPath(); cx.arc(x, d.y, d.r, 0, 6.283); cx.fill();
+  }
+  shots = shots.filter(o => {
+    const k = (t - o.t0) / o.life;
+    if (k >= 1) return false; if (k < 0) return true;
+    const x = o.x + o.dx * k, y = o.y + o.dy * k, tx = x - o.dx * .22, ty = y - o.dy * .22;
+    const g = cx.createLinearGradient(x, y, tx, ty);
+    g.addColorStop(0, "rgba(255,246,234,.95)"); g.addColorStop(.3, "rgba(242,196,109,.5)"); g.addColorStop(1, "rgba(242,196,109,0)");
+    cx.globalAlpha = 1 - k * k; cx.strokeStyle = g; cx.lineWidth = 2; cx.lineCap = "round";
+    cx.beginPath(); cx.moveTo(x, y); cx.lineTo(tx, ty); cx.stroke();
+    cx.fillStyle = "#fff6ea"; cx.beginPath(); cx.arc(x, y, 1.6, 0, 6.283); cx.fill();
+    return true;
+  });
+  if (!reduce) requestAnimationFrame(draw);
+}
+function launch(){
+  const ang = rnd(.3, .6);
+  shots.push({ t0: performance.now(), x: rnd(W * .05, W * .7), y: rnd(0, H * .35), dx: Math.cos(ang) * W * .5, dy: Math.sin(ang) * W * .5, life: rnd(900, 1400) });
+  setTimeout(launch, rnd(7000, 13000));
+}
+size();
+let lw = innerWidth, lh = innerHeight;
+addEventListener("resize", () => {   // phone URL bars resize the window while scrolling; ignore that
+  if (innerWidth === lw && Math.abs(innerHeight - lh) < 160) return;
+  lw = innerWidth; lh = innerHeight; size(); if (reduce) draw(0);
+});
+requestAnimationFrame(draw);
+if (!reduce) setTimeout(launch, 2500);
+</script>
+</body>
+</html>
