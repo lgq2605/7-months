@@ -114,6 +114,20 @@ dialog[open]{animation:dlg .5s ease}
 @keyframes rise{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.card>*{animation:none}.hero-in{animation:none;opacity:1;transform:none}.star .core,.star .halo,.sky line{transition:none}.star.hint .core,.final.ready .core,.final.pop{animation:none}.w{animation:none;opacity:1}dialog[open]{animation:none}.star.lit .rays,#nebula{animation:none}.clock{transition:none}}
 
+/* ===== Gentle background music ===== */
+.music-toggle{
+  position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));
+  z-index:20;display:flex;align-items:center;gap:.55rem;
+  padding:.7rem 1rem;border:1px solid #f2c46d66;border-radius:999px;
+  color:var(--paper);background:#1d1a3ee8;backdrop-filter:blur(12px);
+  font:500 .88rem var(--sans);cursor:pointer;box-shadow:0 8px 30px #0003;
+  transition:border-color .2s,transform .2s,background .2s
+}
+.music-toggle:hover{border-color:var(--gold);transform:translateY(-2px)}
+.music-toggle .music-icon{color:var(--gold);font-size:1rem}
+.music-toggle[aria-pressed="true"]{border-color:#e8a5b5aa}
+@media(prefers-reduced-motion:reduce){.music-toggle{transition:none}}
+
 </style>
 </head>
 <body>
@@ -153,6 +167,12 @@ dialog[open]{animation:dlg .5s ease}
   </footer>
 </main>
 
+
+<button class="music-toggle" id="musicToggle" type="button" aria-pressed="false"
+        aria-label="Play background music">
+  <span class="music-icon" aria-hidden="true">♫</span>
+  <span id="musicLabel">Play our song</span>
+</button>
 
 <dialog id="letter" aria-labelledby="lt">
   <h2 id="lt">A last star</h2>
@@ -484,78 +504,97 @@ if (!reduce) setTimeout(launch, 2500);
 </script>
 
 <script>
-/* ===== Original, continuous background music =====
-   Attempts autoplay on entry. If the browser blocks audible autoplay,
-   it starts on the visitor's first interaction (browser security policy).
-   There is deliberately no on-page stop button.
+/* ===== Original, procedural background music =====
+   A gentle celestial piano-and-pad loop in D major.
+   Audio starts only after the visitor presses the music button.
 */
 (() => {
+  const button = document.getElementById("musicToggle");
+  const label = document.getElementById("musicLabel");
+  if (!button || !label) return;
+
   let ctx = null, master = null, timer = null, playing = false;
   let step = 0, nextTime = 0;
   const bpm = 72;
   const beat = 60 / bpm;
+  const bar = beat * 4;
 
   // D – A – Bm – G: warm, hopeful, romantic.
   const chords = [
-    [50, 54, 57, 62],
-    [45, 49, 52, 57],
-    [47, 50, 54, 59],
-    [43, 47, 50, 55]
+    [50, 54, 57, 62], // D
+    [45, 49, 52, 57], // A
+    [47, 50, 54, 59], // Bm
+    [43, 47, 50, 55]  // G
   ];
+  // A small, original melody; MIDI note numbers.
   const melody = [
     [74, null, 69, 71, 74, null, 76, 74],
     [73, null, 69, 71, 76, null, 73, 71],
     [71, null, 74, 78, 76, null, 74, 71],
     [67, null, 71, 74, 76, null, 74, 71]
   ];
+
   const hz = midi => 440 * Math.pow(2, (midi - 69) / 12);
 
-  function tone(freq, at, duration, volume, type, destination, attack = 0.025) {
+  function tone(freq, start, duration, volume, type, destination, attack = 0.025) {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     const filter = ctx.createBiquadFilter();
     osc.type = type;
-    osc.frequency.setValueAtTime(freq, at);
+    osc.frequency.setValueAtTime(freq, start);
     filter.type = "lowpass";
-    filter.frequency.setValueAtTime(type === "triangle" ? 2400 : 1500, at);
-    gain.gain.setValueAtTime(0.0001, at);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume), at + attack);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume * 0.32), at + Math.max(attack + 0.08, duration * 0.55));
-    gain.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+    filter.frequency.setValueAtTime(type === "triangle" ? 2400 : 1500, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume), start + attack);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume * 0.32), start + Math.max(attack + 0.08, duration * 0.55));
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
     osc.connect(filter).connect(gain).connect(destination);
-    osc.start(at);
-    osc.stop(at + duration + 0.04);
+    osc.start(start);
+    osc.stop(start + duration + 0.04);
   }
 
-  function piano(note, at, duration, volume = 0.12) {
-    tone(hz(note), at, duration, volume, "triangle", master, 0.008);
-    tone(hz(note + 12), at, duration * 0.48, volume * 0.16, "sine", master, 0.004);
+  function piano(note, start, duration, volume = 0.12) {
+    // Two soft partials give the triangle oscillator a mellow, piano-like colour.
+    tone(hz(note), start, duration, volume, "triangle", master, 0.008);
+    tone(hz(note + 12), start, duration * 0.48, volume * 0.16, "sine", master, 0.004);
   }
 
-  function scheduleStep(index, at) {
-    const chord = chords[Math.floor(index / 8) % 4];
+  function scheduleStep(index, time) {
+    const barIndex = Math.floor(index / 8) % 4;
     const within = index % 8;
+    const chord = chords[barIndex];
+
+    // Floating, broken-chord accompaniment.
     const pattern = [0, 2, 1, 2, 3, 2, 1, 2];
-    if (within === 0 || within === 4) piano(chord[0] - 12, at, beat * 2.1, 0.075);
-    piano(chord[pattern[within]], at, beat * 1.65, 0.052);
-    const note = melody[Math.floor(index / 8) % 4][within];
-    if (note !== null) piano(note, at + 0.015, beat * 1.45, 0.075);
+    const bass = chord[0] - 12;
+    if (within === 0 || within === 4) piano(bass, time, beat * 2.1, 0.075);
+    piano(chord[pattern[within]], time, beat * 1.65, 0.052);
+
+    // Sparse high melody, with space between phrases.
+    const note = melody[barIndex][within];
+    if (note !== null) piano(note, time + 0.015, beat * 1.45, 0.075);
+
+    // A quiet upper chord tone adds a little starlight.
     if (within === 2 || within === 6) {
-      tone(hz(chord[3] + 12), at, beat * 1.8, 0.018, "sine", master, 0.12);
+      tone(hz(chord[3] + 12), time, beat * 1.8, 0.018, "sine", master, 0.12);
     }
   }
 
   function scheduler() {
     if (!playing || !ctx) return;
     while (nextTime < ctx.currentTime + 0.12) {
-      scheduleStep(step++, nextTime);
+      scheduleStep(step, nextTime);
+      step++;
       nextTime += beat / 2;
     }
   }
 
-  async function startMusic() {
+  async function start() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return false;
+    if (!AudioContext) {
+      label.textContent = "Audio not supported";
+      return;
+    }
     if (!ctx) {
       ctx = new AudioContext();
       master = ctx.createGain();
@@ -567,42 +606,46 @@ if (!reduce) setTimeout(launch, 2500);
       master.connect(compressor).connect(ctx.destination);
     }
     await ctx.resume();
-    if (ctx.state !== "running") return false;
-    if (!playing) {
-      playing = true;
-      nextTime = ctx.currentTime + 0.08;
-      timer = window.setInterval(scheduler, 80);
-      scheduler();
-    }
-    return true;
+    playing = true;
+    button.setAttribute("aria-pressed", "true");
+    button.setAttribute("aria-label", "Pause background music");
+    label.textContent = "Pause our song";
+    nextTime = ctx.currentTime + 0.08;
+    timer = window.setInterval(scheduler, 80);
+    scheduler();
   }
 
-  // Try immediately on page entry. Browsers may reject audible autoplay.
-  startMusic().then(started => {
-    if (started) return;
-    const resumeOnInteraction = () => {
-      startMusic().then(ok => {
-        if (ok) {
-          window.removeEventListener("pointerdown", resumeOnInteraction);
-          window.removeEventListener("keydown", resumeOnInteraction);
-          window.removeEventListener("touchstart", resumeOnInteraction);
+  function stop() {
+    playing = false;
+    if (timer !== null) window.clearInterval(timer);
+    timer = null;
+    if (master && ctx) {
+      const now = ctx.currentTime;
+      master.gain.cancelScheduledValues(now);
+      master.gain.setTargetAtTime(0, now, 0.12);
+      window.setTimeout(() => {
+        if (!playing && ctx && master) {
+          master.gain.cancelScheduledValues(ctx.currentTime);
+          master.gain.setValueAtTime(0.48, ctx.currentTime);
         }
-      }).catch(() => {});
-    };
-    window.addEventListener("pointerdown", resumeOnInteraction, { passive: true });
-    window.addEventListener("keydown", resumeOnInteraction);
-    window.addEventListener("touchstart", resumeOnInteraction, { passive: true });
-  }).catch(() => {
-    // If autoplay is blocked, the interaction listeners above are installed below.
-    const resumeOnInteraction = () => {
-      startMusic().catch(() => {});
-      window.removeEventListener("pointerdown", resumeOnInteraction);
-      window.removeEventListener("keydown", resumeOnInteraction);
-      window.removeEventListener("touchstart", resumeOnInteraction);
-    };
-    window.addEventListener("pointerdown", resumeOnInteraction, { passive: true });
-    window.addEventListener("keydown", resumeOnInteraction);
-    window.addEventListener("touchstart", resumeOnInteraction, { passive: true });
+      }, 500);
+    }
+    button.setAttribute("aria-pressed", "false");
+    button.setAttribute("aria-label", "Play background music");
+    label.textContent = "Play our song";
+  }
+
+  button.addEventListener("click", () => {
+    if (playing) stop();
+    else start().catch(() => {
+      label.textContent = "Tap to play";
+      playing = false;
+      button.setAttribute("aria-pressed", "false");
+    });
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && playing) stop();
   });
 })();
 </script>
