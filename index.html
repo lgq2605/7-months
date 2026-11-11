@@ -113,6 +113,7 @@ dialog[open]{animation:dlg .5s ease}
 .hero-in{opacity:0;transform:translateY(14px);animation:rise 1.1s .15s ease forwards}
 @keyframes rise{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.card>*{animation:none}.hero-in{animation:none;opacity:1;transform:none}.star .core,.star .halo,.sky line{transition:none}.star.hint .core,.final.ready .core,.final.pop{animation:none}.w{animation:none;opacity:1}dialog[open]{animation:none}.star.lit .rays,#nebula{animation:none}.clock{transition:none}}
+
 </style>
 </head>
 <body>
@@ -151,6 +152,7 @@ dialog[open]{animation:dlg .5s ease}
     <button type="button" class="again" id="again">Light the stars again</button>
   </footer>
 </main>
+
 
 <dialog id="letter" aria-labelledby="lt">
   <h2 id="lt">A last star</h2>
@@ -480,5 +482,130 @@ addEventListener("resize", () => {   // phone URL bars resize the window while s
 requestAnimationFrame(draw);
 if (!reduce) setTimeout(launch, 2500);
 </script>
+
+<script>
+/* ===== Original, continuous background music =====
+   Attempts autoplay on entry. If the browser blocks audible autoplay,
+   it starts on the visitor's first interaction (browser security policy).
+   There is deliberately no on-page stop button.
+*/
+(() => {
+  let ctx = null, master = null, timer = null, playing = false;
+  let step = 0, nextTime = 0;
+  const bpm = 72;
+  const beat = 60 / bpm;
+
+  // D – A – Bm – G: warm, hopeful, romantic.
+  const chords = [
+    [50, 54, 57, 62],
+    [45, 49, 52, 57],
+    [47, 50, 54, 59],
+    [43, 47, 50, 55]
+  ];
+  const melody = [
+    [74, null, 69, 71, 74, null, 76, 74],
+    [73, null, 69, 71, 76, null, 73, 71],
+    [71, null, 74, 78, 76, null, 74, 71],
+    [67, null, 71, 74, 76, null, 74, 71]
+  ];
+  const hz = midi => 440 * Math.pow(2, (midi - 69) / 12);
+
+  function tone(freq, at, duration, volume, type, destination, attack = 0.025) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, at);
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(type === "triangle" ? 2400 : 1500, at);
+    gain.gain.setValueAtTime(0.0001, at);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume), at + attack);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume * 0.32), at + Math.max(attack + 0.08, duration * 0.55));
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+    osc.connect(filter).connect(gain).connect(destination);
+    osc.start(at);
+    osc.stop(at + duration + 0.04);
+  }
+
+  function piano(note, at, duration, volume = 0.12) {
+    tone(hz(note), at, duration, volume, "triangle", master, 0.008);
+    tone(hz(note + 12), at, duration * 0.48, volume * 0.16, "sine", master, 0.004);
+  }
+
+  function scheduleStep(index, at) {
+    const chord = chords[Math.floor(index / 8) % 4];
+    const within = index % 8;
+    const pattern = [0, 2, 1, 2, 3, 2, 1, 2];
+    if (within === 0 || within === 4) piano(chord[0] - 12, at, beat * 2.1, 0.075);
+    piano(chord[pattern[within]], at, beat * 1.65, 0.052);
+    const note = melody[Math.floor(index / 8) % 4][within];
+    if (note !== null) piano(note, at + 0.015, beat * 1.45, 0.075);
+    if (within === 2 || within === 6) {
+      tone(hz(chord[3] + 12), at, beat * 1.8, 0.018, "sine", master, 0.12);
+    }
+  }
+
+  function scheduler() {
+    if (!playing || !ctx) return;
+    while (nextTime < ctx.currentTime + 0.12) {
+      scheduleStep(step++, nextTime);
+      nextTime += beat / 2;
+    }
+  }
+
+  async function startMusic() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return false;
+    if (!ctx) {
+      ctx = new AudioContext();
+      master = ctx.createGain();
+      master.gain.value = 0.48;
+      const compressor = ctx.createDynamicsCompressor();
+      compressor.threshold.value = -24;
+      compressor.knee.value = 18;
+      compressor.ratio.value = 3;
+      master.connect(compressor).connect(ctx.destination);
+    }
+    await ctx.resume();
+    if (ctx.state !== "running") return false;
+    if (!playing) {
+      playing = true;
+      nextTime = ctx.currentTime + 0.08;
+      timer = window.setInterval(scheduler, 80);
+      scheduler();
+    }
+    return true;
+  }
+
+  // Try immediately on page entry. Browsers may reject audible autoplay.
+  startMusic().then(started => {
+    if (started) return;
+    const resumeOnInteraction = () => {
+      startMusic().then(ok => {
+        if (ok) {
+          window.removeEventListener("pointerdown", resumeOnInteraction);
+          window.removeEventListener("keydown", resumeOnInteraction);
+          window.removeEventListener("touchstart", resumeOnInteraction);
+        }
+      }).catch(() => {});
+    };
+    window.addEventListener("pointerdown", resumeOnInteraction, { passive: true });
+    window.addEventListener("keydown", resumeOnInteraction);
+    window.addEventListener("touchstart", resumeOnInteraction, { passive: true });
+  }).catch(() => {
+    // If autoplay is blocked, the interaction listeners above are installed below.
+    const resumeOnInteraction = () => {
+      startMusic().catch(() => {});
+      window.removeEventListener("pointerdown", resumeOnInteraction);
+      window.removeEventListener("keydown", resumeOnInteraction);
+      window.removeEventListener("touchstart", resumeOnInteraction);
+    };
+    window.addEventListener("pointerdown", resumeOnInteraction, { passive: true });
+    window.addEventListener("keydown", resumeOnInteraction);
+    window.addEventListener("touchstart", resumeOnInteraction, { passive: true });
+  });
+})();
+</script>
+
 </body>
 </html>
